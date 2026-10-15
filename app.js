@@ -1,5 +1,5 @@
 // Clean & Refactored Flower Personality Quiz Web App
-// Data extracted & modernized from 5thseasonfloral (removed all sales, shops, and brand logos)
+// Data extracted & modernized from 5thseasonfloral (Zero-sales, Zero-logo, Full Mobile/WebView Compatibility)
 
 const results = [
   {
@@ -1088,16 +1088,22 @@ let answers = [];
 let step = 0;
 let currentResult = null;
 let userPhoto = null;
-const app = document.querySelector('#app');
+
+function getApp() {
+  return document.querySelector('#app') || document.body;
+}
 
 function mount(html) {
-  app.innerHTML = html;
-  window.scrollTo({ top: 0, behavior: 'instant' });
-  const h = app.querySelector('h1, h2');
-  if (h) {
-    h.tabIndex = -1;
-    h.focus({ preventScroll: true });
-  }
+  const el = getApp();
+  el.innerHTML = html;
+  try { window.scrollTo(0, 0); } catch (e) {}
+  try {
+    const h = el.querySelector('h1, h2');
+    if (h) {
+      h.tabIndex = -1;
+      h.focus({ preventScroll: true });
+    }
+  } catch (e) {}
 }
 
 function score(a) {
@@ -1136,11 +1142,14 @@ function home() {
       </div>
     </section>
   `);
-  document.querySelector('#start').onclick = () => {
-    answers = [];
-    step = 0;
-    question();
-  };
+  const btn = document.querySelector('#start');
+  if (btn) {
+    btn.onclick = () => {
+      answers = [];
+      step = 0;
+      question();
+    };
+  }
 }
 
 function question() {
@@ -1173,23 +1182,29 @@ function question() {
     </section>
   `);
 
-  app.querySelector('.back').onclick = () => {
-    if (step === 0) home();
-    else {
-      step--;
-      answers = answers.slice(0, step);
-      question();
-    }
-  };
+  const appEl = getApp();
+  const backBtn = appEl.querySelector('.back');
+  if (backBtn) {
+    backBtn.onclick = () => {
+      if (step === 0) home();
+      else {
+        step--;
+        answers = answers.slice(0, step);
+        question();
+      }
+    };
+  }
 
-  app.querySelectorAll('.answer').forEach(b => b.onclick = () => {
-    answers[step] = Number(b.dataset.index);
-    if (step === questions.length - 1) {
-      location.hash = 'result=' + results[score(answers)].id;
-    } else {
-      step++;
-      question();
-    }
+  appEl.querySelectorAll('.answer').forEach(b => {
+    b.onclick = () => {
+      answers[step] = Number(b.dataset.index);
+      if (step === questions.length - 1) {
+        location.hash = 'result=' + results[score(answers)].id;
+      } else {
+        step++;
+        question();
+      }
+    };
   });
 }
 
@@ -1269,18 +1284,26 @@ function result(index) {
     </section>
   `);
 
-  app.querySelector('#again').onclick = () => {
-    history.replaceState(null, '', location.pathname + location.search);
-    home();
-  };
+  const appEl = getApp();
+  const againBtn = appEl.querySelector('#again');
+  if (againBtn) {
+    againBtn.onclick = () => {
+      history.replaceState(null, '', location.pathname + location.search);
+      home();
+    };
+  }
 
-  app.querySelector('#share').onclick = share;
-  app.querySelectorAll('.dl-btn').forEach(b => b.onclick = () => downloadCard(b.dataset.variant, b));
+  const shareBtn = appEl.querySelector('#share');
+  if (shareBtn) shareBtn.onclick = share;
 
-  const pin = app.querySelector('#photo-in');
-  const prm = app.querySelector('#photo-rm');
-  const box = app.querySelector('#art-box');
-  const ptx = app.querySelector('#photo-txt');
+  appEl.querySelectorAll('.dl-btn').forEach(b => {
+    b.onclick = () => downloadCard(b.dataset.variant, b);
+  });
+
+  const pin = appEl.querySelector('#photo-in');
+  const prm = appEl.querySelector('#photo-rm');
+  const box = appEl.querySelector('#art-box');
+  const ptx = appEl.querySelector('#photo-txt');
 
   async function paint() {
     if (!userPhoto) {
@@ -1295,23 +1318,27 @@ function result(index) {
     prm.hidden = false;
   }
 
-  pin.onchange = async () => {
-    const f = pin.files && pin.files[0];
-    if (!f) return;
-    try {
-      userPhoto = await readPhoto(f);
-      await paint();
-      toast('Đã chèn ảnh của bạn vào bông hoa thành công!');
-    } catch (e) {
-      toast('Chưa đọc được ảnh này, vui lòng chọn file JPG hoặc PNG nha.');
-    }
-    pin.value = '';
-  };
+  if (pin) {
+    pin.onchange = async () => {
+      const f = pin.files && pin.files[0];
+      if (!f) return;
+      try {
+        userPhoto = await readPhoto(f);
+        await paint();
+        toast('Đã chèn ảnh của bạn vào bông hoa thành công!');
+      } catch (e) {
+        toast('Chưa đọc được ảnh này, vui lòng chọn file JPG hoặc PNG nha.');
+      }
+      pin.value = '';
+    };
+  }
 
-  prm.onclick = () => {
-    userPhoto = null;
-    paint();
-  };
+  if (prm) {
+    prm.onclick = () => {
+      userPhoto = null;
+      paint();
+    };
+  }
 
   if (userPhoto) paint();
 }
@@ -1448,12 +1475,16 @@ async function artCanvas(r, px, photo) {
   return c;
 }
 
-// Story Card Generator (1080x1920)
+// Story Card Generator (1080x1920) with robust cross-browser safeguards
 async function makeCard(variant) {
   variant = variant === 'lech' ? 'lech' : variant === 'both' ? 'both' : 'hop';
   const r = results[currentResult];
   const cp = COMPAT[r.id][variant === 'both' ? 'hop' : variant];
-  await document.fonts.ready;
+  
+  if (typeof document !== 'undefined' && document.fonts && document.fonts.ready) {
+    try { await document.fonts.ready; } catch (e) {}
+  }
+
   const W = 1080, H = 1920, FF = '"Be Vietnam Pro", Arial, sans-serif';
   const c = document.createElement('canvas');
   c.width = W;
@@ -1648,12 +1679,15 @@ async function makeCard(variant) {
   return c;
 }
 
+// Universal Modal Download (Cross-platform WebView Compatible)
 async function downloadCard(variant, btn) {
   variant = variant === 'lech' ? 'lech' : variant === 'both' ? 'both' : 'hop';
-  const b = btn || app.querySelector('.dl-btn');
-  const old = b.textContent;
-  b.disabled = true;
-  b.textContent = 'Đang khởi tạo ảnh Story…';
+  const b = btn || document.querySelector('.dl-btn');
+  const oldText = b ? b.textContent : '';
+  if (b) {
+    b.disabled = true;
+    b.textContent = 'Đang khởi tạo ảnh Story…';
+  }
 
   try {
     const c = await makeCard(variant);
@@ -1662,39 +1696,80 @@ async function downloadCard(variant, btn) {
     const name = 'flower-quiz-' + results[currentResult].id + '-' + variant + '.png';
     const url = URL.createObjectURL(blob);
 
-    const modal = document.createElement('dialog');
-    modal.className = 'card-modal';
-    modal.innerHTML = `
-      <button class="text-btn close-card" aria-label="Đóng">×</button>
-      <h3>Thẻ Story ${variant === 'both' ? 'Hợp cạ & Lệch sóng' : variant === 'hop' ? 'Hợp cạ' : 'Lệch sóng'}</h3>
-      <p>Lưu ảnh về máy và đăng tải lên Story Facebook / Instagram / TikTok để khoe nhé!</p>
-      <img src="${url}" alt="Thẻ Story ${results[currentResult].name}">
-      <div>
-        <a class="primary" href="${url}" download="${name}">Lưu ảnh về máy ↓</a>
-      </div>
-    `;
-    document.body.append(modal);
-    modal.querySelector('.close-card').onclick = () => modal.close();
-    modal.addEventListener('close', () => {
-      URL.revokeObjectURL(url);
-      modal.remove();
-    });
-    modal.showModal();
+    const overlay = document.querySelector('#cardModalOverlay');
+    const modalBox = document.querySelector('#cardModalContent');
+    
+    if (overlay && modalBox) {
+      modalBox.innerHTML = `
+        <button class="close-card" id="closeCardBtn" aria-label="Đóng">×</button>
+        <h3>Thẻ Story ${variant === 'both' ? 'Hợp cạ & Lệch sóng' : variant === 'hop' ? 'Hợp cạ' : 'Lệch sóng'}</h3>
+        <p>Nhấn giữ ảnh hoặc bấm nút bên dưới để tải ảnh về đăng Story Facebook / Instagram / TikTok nhé!</p>
+        <img src="${url}" alt="Thẻ Story ${results[currentResult].name}">
+        <div>
+          <a class="primary" href="${url}" download="${name}">Lưu ảnh về máy ↓</a>
+        </div>
+      `;
+      overlay.classList.add('open');
+      overlay.setAttribute('aria-hidden', 'false');
+
+      const close = () => {
+        overlay.classList.remove('open');
+        overlay.setAttribute('aria-hidden', 'true');
+        URL.revokeObjectURL(url);
+      };
+
+      const closeBtn = document.querySelector('#closeCardBtn');
+      if (closeBtn) closeBtn.onclick = close;
+      overlay.onclick = (e) => {
+        if (e.target === overlay) close();
+      };
+    }
   } catch (e) {
     toast('Chưa tạo được ảnh, vui lòng thử lại nha.');
     console.error(e);
   } finally {
-    b.disabled = false;
-    b.textContent = old;
+    if (b) {
+      b.disabled = false;
+      b.textContent = oldText;
+    }
+  }
+}
+
+function bindGlobalEvents() {
+  const startBtn = document.querySelector('#start');
+  if (startBtn) {
+    startBtn.onclick = () => {
+      answers = [];
+      step = 0;
+      question();
+    };
+  }
+  const brandBtn = document.querySelector('.brand-badge');
+  if (brandBtn) {
+    brandBtn.onclick = (e) => {
+      e.preventDefault();
+      history.replaceState(null, '', location.pathname + location.search);
+      home();
+    };
   }
 }
 
 function route() {
-  const id = new URLSearchParams(location.hash.slice(1)).get('result');
+  const hash = location.hash || '';
+  const id = new URLSearchParams(hash.replace(/^#/, '')).get('result');
   const i = results.findIndex(r => r.id === id);
   if (i >= 0) result(i);
   else home();
 }
 
 window.addEventListener('hashchange', route);
-route();
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    bindGlobalEvents();
+    route();
+  });
+} else {
+  bindGlobalEvents();
+  route();
+}

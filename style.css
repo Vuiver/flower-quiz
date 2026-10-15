@@ -592,21 +592,40 @@ h1 em {
   margin-top: 30px;
 }
 
-/* MODAL FOR STORY CARD */
+/* UNIVERSAL MODAL OVERLAY (100% Mobile & Webview compatible) */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(9, 12, 145, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 .card-modal {
+  position: relative;
   border: 2px solid var(--ink);
   border-radius: 24px;
   background: #fffaf2;
   max-width: 440px;
-  width: 92%;
+  width: 100%;
   padding: 24px 20px;
   box-shadow: 0 16px 40px rgba(9, 12, 145, 0.25);
   text-align: center;
-}
-
-.card-modal::backdrop {
-  background: rgba(9, 12, 145, 0.5);
-  backdrop-filter: blur(4px);
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .card-modal h3 {
@@ -623,7 +642,7 @@ h1 em {
 
 .card-modal img {
   width: 100%;
-  max-height: 55vh;
+  max-height: 52vh;
   object-fit: contain;
   border-radius: 14px;
   border: 1.5px solid var(--line);
@@ -633,11 +652,15 @@ h1 em {
 
 .close-card {
   position: absolute;
-  top: 14px;
-  right: 18px;
-  font-size: 20px;
+  top: 12px;
+  right: 16px;
+  font-size: 24px;
+  line-height: 1;
   color: var(--muted);
   text-decoration: none;
+  cursor: pointer;
+  background: none;
+  border: none;
 }
 
 #toast {

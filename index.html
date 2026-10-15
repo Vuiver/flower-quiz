@@ -2,10 +2,18 @@
 <html lang="vi">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <meta name="theme-color" content="#090c91">
-  <meta name="description" content="Bạn là bông hoa nào? Trắc nghiệm tính cách qua 10 câu hỏi đời thường, khám phá 12 loài hoa đại diện và những người bạn hợp cạ.">
+  <meta name="description" content="Bạn là bông hoa nào? 10 câu hỏi đời thường, khám phá 12 loài hoa đại diện cá tính và những người bạn hợp cạ.">
   <title>Bạn là bông hoa nào? — Personality Quiz</title>
+
+  <!-- Open Graph / Zalo / Facebook Link Preview Meta -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://vuiver.github.io/flower-quiz/">
+  <meta property="og:title" content="Bạn là bông hoa nào? — Personality Quiz">
+  <meta property="og:description" content="Khám phá nét đẹp riêng, cá tính và bạn bè hợp cạ qua 10 câu hỏi đời thường cực vui.">
+  <meta property="og:image" content="https://raw.githubusercontent.com/Vuiver/flower-quiz/main/data/flower_quiz_data.json">
+
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -16,13 +24,32 @@
     </a>
   </header>
 
-  <main id="app"></main>
+  <!-- Pre-rendered initial hero section: NEVER BLANK on slow/in-app WebViews -->
+  <main id="app">
+    <section class="hero fade">
+      <div class="hero-copy">
+        <span class="hero-badge">🌸 PERSONALITY TEST</span>
+        <h1>Bạn là<br><em>bông hoa nào?</em></h1>
+        <p class="intro">Mỗi người đều mang năng lượng và vẻ đẹp riêng. Khám phá loài hoa đại diện cho cá tính, gu cảm xúc và những mối quan hệ hợp cạ của bạn.</p>
+        <button class="primary" id="start">
+          <span>Bắt đầu khám phá</span>
+          <span class="arrow" aria-hidden="true">→</span>
+        </button>
+        <p class="micro">10 câu hỏi đời thường · 12 loài hoa · 3 phút hoàn thành</p>
+      </div>
+    </section>
+  </main>
 
   <footer>
     Interactive Personality Quiz · Khám phá nét đẹp riêng trong bạn
   </footer>
 
   <div id="toast" role="status" aria-live="polite"></div>
+
+  <!-- Universal Modal Container for Story Card Download -->
+  <div class="modal-overlay" id="cardModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="card-modal" id="cardModalContent"></div>
+  </div>
 
   <script src="illustrations.js"></script>
   <script src="app.js"></script>
